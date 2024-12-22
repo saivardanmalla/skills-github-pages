@@ -1,0 +1,271 @@
+//Hospital  Management System using the  programming
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Structure Definitions
+typedef struct {
+	// Intialize the id Given by the hospital
+    int id; 
+    // Intialize the  name  of the patient
+    char name[50]; 
+    // Intialize the age of the patient
+    int age; 
+    // Intialize  the gender of the patient  
+    char gender[10]; 
+    // Intialize the disease occured by the patient
+    char disease[100]; 
+     //Intialize the Doctot-Assigned for the patient
+    char doctorAssigned[50];
+} Patient;
+
+// Function Prototypes
+// adding the ptient function
+void addPatient();
+//Adding the patient function
+void viewPatients();
+//Searching the no of the patient's
+void searchPatient();
+//Updating the patient's names
+void updatePatient();
+//Delting the patient's
+void deletePatient();
+
+// Global File Pointer
+FILE *file;
+
+// Main Function
+int main() {
+    int choice;
+
+    do { 
+    	//Print the Hospital Management System for the patient
+        printf("\n--- Hospital Management System ---\n");
+        //Adding of teh patient
+        printf("1. Add Patient\n");
+        //Total number of the patient's
+        printf("2. View All Patients\n");
+        //Searchig of the patient in the hospital
+        printf("3. Search Patient\n");
+        //Updating the patients for in the hospital
+        printf("4. Update Patient\n");
+        //Deleting the patient after the recovery
+        printf("5. Delete Patient\n");
+        //Exiciting from the hospital
+        printf("6. Exit\n");
+        //Enter the choice you want in above the option's
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+        //Using the switch case to updating the cases
+        switch (choice) {
+            case 1:
+                addPatient();
+                break;
+            case 2:
+                viewPatients();
+                break;
+            case 3:
+                searchPatient();
+                break;
+            case 4:
+                updatePatient();
+                break;
+            case 5:
+                deletePatient();
+                break;
+            case 6:
+                printf("Exiting the program. Thank you!\n");
+                break;
+            default:
+                printf("Invalid choice! Try again.\n");
+        }
+    } while (choice != 6);
+
+    return 0;
+}
+
+// Add Patient Function
+void addPatient() {
+    Patient p;
+    file = fopen("patients.dat", "ab"); // Open file in append mode
+    // condition applied in it
+    if (!file) {
+        printf("Error opening file!\n");
+        return;
+    }
+
+    printf("\nEnter Patient ID: ");
+    scanf("%d", &p.id);
+    printf("Enter Name: ");
+    getchar(); // Clear newline buffer
+    fgets(p.name, 50, stdin);
+    p.name[strcspn(p.name, "\n")] = 0; // Remove newline character
+    printf("Enter Age: ");
+    scanf("%d", &p.age);
+    printf("Enter Gender: ");
+    scanf("%s", p.gender);
+    printf("Enter Disease: ");
+    getchar(); // Clear newline buffer
+    fgets(p.disease, 100, stdin);
+    p.disease[strcspn(p.disease, "\n")] = 0; // Remove newline character
+    printf("Enter Assigned Doctor: ");
+    fgets(p.doctorAssigned, 50, stdin);
+    p.doctorAssigned[strcspn(p.doctorAssigned, "\n")] = 0; // Remove newline character
+
+    fwrite(&p, sizeof(Patient), 1, file); // Write to file
+    fclose(file);
+
+    printf("Patient added successfully!\n");
+}
+
+// View Patients Function
+void viewPatients() {
+    Patient p;
+    file = fopen("patients.dat", "rb"); // Open file in read mode
+    if (!file) {
+        printf("Error opening file!\n");
+        return;
+    }
+
+    printf("\n--- List of Patients ---\n");
+    while (fread(&p, sizeof(Patient), 1, file)) {
+        printf("ID: %d\n", p.id);
+        printf("Name: %s\n", p.name);
+        printf("Age: %d\n", p.age);
+        printf("Gender: %s\n", p.gender);
+        printf("Disease: %s\n", p.disease);
+        printf("Doctor Assigned: %s\n", p.doctorAssigned);
+        printf("-----------------------\n");
+    }
+
+    fclose(file);
+}
+
+// Search Patient Function
+void searchPatient() {
+    int searchId;
+    Patient p;
+    int found = 0;
+
+    printf("\nEnter Patient ID to Search: ");
+    scanf("%d", &searchId);
+
+    file = fopen("patients.dat", "rb");
+    if (!file) {
+        printf("Error opening file!\n");
+        return;
+    }
+
+    while (fread(&p, sizeof(Patient), 1, file)) {
+        if (p.id == searchId) {
+            printf("\n--- Patient Details ---\n");
+            printf("ID: %d\n", p.id);
+            printf("Name: %s\n", p.name);
+            printf("Age: %d\n", p.age);
+            printf("Gender: %s\n", p.gender);
+            printf("Disease: %s\n", p.disease);
+            printf("Doctor Assigned: %s\n", p.doctorAssigned);
+            printf("-----------------------\n");
+            found = 1;
+            break;
+        }
+    }
+
+    if (!found) {
+        printf("Patient not found!\n");
+    }
+
+    fclose(file);
+}
+
+// Update Patient Function
+void updatePatient() {
+    int updateId, found = 0;
+    Patient p;
+    FILE *tempFile;
+
+    printf("\nEnter Patient ID to Update: ");
+    scanf("%d", &updateId);
+
+    file = fopen("patients.dat", "rb");
+    tempFile = fopen("temp.dat", "wb");
+
+    if (!file || !tempFile) {
+        printf("Error opening file!\n");
+        return;
+    }
+
+    while (fread(&p, sizeof(Patient), 1, file)) {
+        if (p.id == updateId) {
+            found = 1;
+            printf("\nEnter New Details:\n");
+            printf("Enter Name: ");
+            getchar(); // Clear newline buffer
+            fgets(p.name, 50, stdin);
+            p.name[strcspn(p.name, "\n")] = 0;
+            printf("Enter Age: ");
+            scanf("%d", &p.age);
+            printf("Enter Gender: ");
+            scanf("%s", p.gender);
+            printf("Enter Disease: ");
+            getchar(); // Clear newline buffer
+            fgets(p.disease, 100, stdin);
+            p.disease[strcspn(p.disease, "\n")] = 0;
+            printf("Enter Assigned Doctor: ");
+            fgets(p.doctorAssigned, 50, stdin);
+            p.doctorAssigned[strcspn(p.doctorAssigned, "\n")] = 0;
+        }
+        fwrite(&p, sizeof(Patient), 1, tempFile);
+    }
+
+    fclose(file);
+    fclose(tempFile);
+
+    remove("patients.dat");
+    rename("temp.dat", "patients.dat");
+
+    if (found) {
+        printf("Patient updated successfully!\n");
+    } else {
+        printf("Patient not found!\n");
+    }
+}
+
+// Delete Patient Function
+void deletePatient() {
+    int deleteId, found = 0;
+    Patient p;
+    FILE *tempFile;
+
+    printf("\nEnter Patient ID to Delete: ");
+    scanf("%d", &deleteId);
+
+    file = fopen("patients.dat", "rb");
+    tempFile = fopen("temp.dat", "wb");
+
+    if (!file || !tempFile) {
+        printf("Error opening file!\n");
+        return;
+    }
+
+    while (fread(&p, sizeof(Patient), 1, file)) {
+        if (p.id != deleteId) {
+            fwrite(&p, sizeof(Patient), 1, tempFile);
+        } else {
+            found = 1;
+        }
+    }
+//closing the fonction file
+    fclose(file);
+    fclose(tempFile);
+//Removing the function name
+    remove("patients.dat");
+    rename("temp.dat", "patients.dat");
+//If there is patient delete the patient successfull
+    if (found) {
+        printf("Patient deleted successfully!\n");
+        //If therer is no patient then out-put not found
+    } else {
+        printf("Patient not found!\n");
+    }
+}
